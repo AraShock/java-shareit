@@ -128,6 +128,7 @@ public class ItemServiceImpl implements ItemService {
         Logger.logSave(HttpMethod.GET, uriComponents.toUriString(), itemDto.toString());
         return itemDto;
     }
+
     @Transactional(readOnly = true)
     @Override
     public List<ItemDto> getAllItems(long userId) {
@@ -136,13 +137,13 @@ public class ItemServiceImpl implements ItemService {
         List<ItemDto> itemsDto = items.stream()
                 .map(itemMapper::convertToDto)
                 .collect(Collectors.toList());
-        Logger.logInfo(HttpMethod.GET, "/items",  items.toString());
+        Logger.logInfo(HttpMethod.GET, "/items", items.toString());
         List<Booking> bookings = bookingRepository.findAllByOwnerId(userId,
                 Sort.by(Sort.Direction.DESC, "start"));
         List<BookingDtoShort> bookingDtoShorts = bookings.stream()
                 .map(bookingMapper::convertToDtoShort)
                 .collect(Collectors.toList());
-        Logger.logInfo(HttpMethod.GET, "/items",  bookings.toString());
+        Logger.logInfo(HttpMethod.GET, "/items", bookings.toString());
         List<Comment> comments = commentRepository.findAllByItemIdIn(
                 items.stream()
                         .map(Item::getId)
@@ -210,7 +211,7 @@ public class ItemServiceImpl implements ItemService {
                 String.format("Вещь с id %s не найдена", itemId)));
         List<Booking> bookings = bookingRepository.findAllByItemIdAndBookerIdAndStatus(itemId, userId, Status.APPROVED,
                 Sort.by(Sort.Direction.DESC, "start")).orElseThrow(() -> new ObjectNotFoundException(
-                                String.format("Пользователь с id %d не арендовал вещь с id %d.", userId, itemId)));
+                String.format("Пользователь с id %d не арендовал вещь с id %d.", userId, itemId)));
         Logger.logInfo(HttpMethod.POST, "/items/" + itemId + "/comment", bookings.toString());
         bookings.stream().filter(booking -> booking.getEnd().isBefore(LocalDateTime.now())).findAny().orElseThrow(() ->
                 new ObjectNotAvailableException(String.format("Пользователь с id %d не может оставлять комментарии вещи " +
@@ -241,6 +242,7 @@ public class ItemServiceImpl implements ItemService {
                         booking.getStart().isAfter(now))
                 .min(Comparator.comparing(BookingDtoShort::getStart)).orElse(null));
     }
+
     private void setComments(ItemDto itemDto, List<Comment> comments) {
         itemDto.setComments(comments.stream()
                 .filter(comment -> comment.getItem().getId() == itemDto.getId())
