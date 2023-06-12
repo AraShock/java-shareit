@@ -20,19 +20,20 @@ import java.util.List;
 @RequestMapping(path = "/bookings")
 @AllArgsConstructor
 public class BookingController {
-    private final BookingService bookingService;
-    private final String host = "localhost";
-    private final String port = "8080";
-    private final String protocol = "http";
+    private  final BookingService bookingService;
+
+    private static final String HOST = "localhost";
+    private static final String PORT = "8080";
+    private static final String PROTOCOL = "http";
     private static final String USER_ID_HEADER = "X-Sharer-User-Id";
 
     @PostMapping    // Добавление нового запроса на бронирование.
     public ResponseEntity<BookingDto> addBooking(@RequestHeader(USER_ID_HEADER) long userId,
                                                  @Valid @RequestBody BookingInputDto bookingInputDto) {
         UriComponents uriComponents = UriComponentsBuilder.newInstance()
-                .scheme(protocol)
-                .host(host)
-                .port(port)
+                .scheme(PROTOCOL)
+                .host(HOST)
+                .port(PORT)
                 .path("/bookings")
                 .build();
         Logger.logRequest(HttpMethod.POST, uriComponents.toUriString(), bookingInputDto.toString());
@@ -43,9 +44,9 @@ public class BookingController {
     public ResponseEntity<BookingDto> approveOrRejectBooking(@PathVariable long bookingId, @RequestParam boolean approved,
                                       @RequestHeader(USER_ID_HEADER) long userId) {
         UriComponents uriComponents = UriComponentsBuilder.newInstance()
-                .scheme(protocol)
-                .host(host)
-                .port(port)
+                .scheme(PROTOCOL)
+                .host(HOST)
+                .port(PORT)
                 .path("/bookings/")
                 .query("approved={approved}")
                 .build();
@@ -56,9 +57,9 @@ public class BookingController {
     @GetMapping("/{bookingId}")   // Получение данных о конкретном бронировании (включая его статус)
     public ResponseEntity<BookingDto> getBookingById(@PathVariable long bookingId, @RequestHeader(USER_ID_HEADER) long userId) {
         UriComponents uriComponents = UriComponentsBuilder.newInstance()
-                .scheme(protocol)
-                .host(host)
-                .port(port)
+                .scheme(PROTOCOL)
+                .host(HOST)
+                .port(PORT)
                 .path("/bookings/{bookingId}")
                 .build();
         Logger.logRequest(HttpMethod.GET, uriComponents.toUriString(), "no body");
@@ -69,9 +70,9 @@ public class BookingController {
     public ResponseEntity<List<BookingDto>> getBookingsOfCurrentUser(@RequestParam(defaultValue = "ALL") String state,
                                               @RequestHeader(USER_ID_HEADER) long userId) {
         UriComponents uriComponents = UriComponentsBuilder.newInstance()
-                .scheme(protocol)
-                .host(host)
-                .port(port)
+                .scheme(PROTOCOL)
+                .host(HOST)
+                .port(PORT)
                 .path("/bookings/")
                 .query("state={state}")
                 .build();
@@ -84,9 +85,9 @@ public class BookingController {
     public ResponseEntity<List<BookingDto>> getBookingsOfOwner(@RequestParam(defaultValue = "ALL") String state,
                                         @RequestHeader(USER_ID_HEADER) long userId) {
         UriComponents uriComponents = UriComponentsBuilder.newInstance()
-                .scheme(protocol)
-                .host(host)
-                .port(port)
+                .scheme(PROTOCOL)
+                .host(HOST)
+                .port(PORT)
                 .path("/bookings/owner")
                 .query("state={state}")
                 .build();

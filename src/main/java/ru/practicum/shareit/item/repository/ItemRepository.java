@@ -10,8 +10,8 @@ public interface ItemRepository extends JpaRepository<Item, Long> {
 
     List<Item> findAllByUserIdOrderById(long userId);
 
-    @Query(value = "select i from Item i where lower(i.name) like %?1% or lower(i.description) like %?1% " +
-            "and i.available=true")
+    @Query(value = "SELECT i FROM Item i WHERE lower(i.name) like %?1% OR lower(i.description) like %?1% " +
+            "AND i.available=TRUE")
     List<Item> findByNameOrDescriptionLike(String text);
 
     void deleteById(long itemId);
