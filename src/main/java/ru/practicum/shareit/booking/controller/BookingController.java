@@ -1,97 +1,68 @@
 package ru.practicum.shareit.booking.controller;
 
-import lombok.AllArgsConstructor;
-import org.springframework.http.HttpMethod;
+import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.util.UriComponents;
-import org.springframework.web.util.UriComponentsBuilder;
-import ru.practicum.shareit.booking.model.AccessLevel;
-import ru.practicum.shareit.booking.dto.BookingDto;
-import ru.practicum.shareit.booking.dto.BookingInputDto;
-import ru.practicum.shareit.booking.model.State;
 import ru.practicum.shareit.booking.service.BookingService;
-import ru.practicum.shareit.logger.Logger;
+import ru.practicum.shareit.booking.dto.BookingDto;
+import ru.practicum.shareit.booking.dto.BookingDtoResponse;
+import ru.practicum.shareit.booking.dto.BookingListDto;
 
 import javax.validation.Valid;
-import java.util.List;
+import javax.validation.constraints.Max;
+import javax.validation.constraints.Min;
 
 @RestController
-@RequestMapping(path = "/bookings")
-@AllArgsConstructor
+@RequestMapping("/bookings")
+@Validated
+@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class BookingController {
-    private  final BookingService bookingService;
 
-    private static final String HOST = "localhost";
-    private static final String PORT = "8080";
-    private static final String PROTOCOL = "http";
+    private final BookingService bookingService;
     private static final String USER_ID_HEADER = "X-Sharer-User-Id";
 
-    @PostMapping    // Добавление нового запроса на бронирование.
-    public ResponseEntity<BookingDto> addBooking(@RequestHeader(USER_ID_HEADER) long userId,
-                                                 @Valid @RequestBody BookingInputDto bookingInputDto) {
-        UriComponents uriComponents = UriComponentsBuilder.newInstance()
-                .scheme(PROTOCOL)
-                .host(HOST)
-                .port(PORT)
-                .path("/bookings")
-                .build();
-        Logger.logRequest(HttpMethod.POST, uriComponents.toUriString(), bookingInputDto.toString());
-        return ResponseEntity.status(201).body(bookingService.addBooking(userId, bookingInputDto));
+    @PostMapping
+    public ResponseEntity<BookingDtoResponse> createBooking(@RequestHeader(USER_ID_HEADER) @Min(1) Long bookerId,
+                                                            @Valid @RequestBody BookingDto bookingDto) {
+        return ResponseEntity.status(HttpStatus.CREATED).body(bookingService.createBooking(bookerId, bookingDto));
     }
 
-    @PatchMapping("/{bookingId}")   // Подтверждение или отклонение запроса на бронирование.
-    public ResponseEntity<BookingDto> approveOrRejectBooking(@PathVariable long bookingId, @RequestParam boolean approved,
-                                      @RequestHeader(USER_ID_HEADER) long userId) {
-        UriComponents uriComponents = UriComponentsBuilder.newInstance()
-                .scheme(PROTOCOL)
-                .host(HOST)
-                .port(PORT)
-                .path("/bookings/")
-                .query("approved={approved}")
-                .build();
-        Logger.logRequest(HttpMethod.PATCH, uriComponents.toUriString(), "no body");
-        return ResponseEntity.ok().body(bookingService.approveOrRejectBooking(userId, bookingId, approved, AccessLevel.OWNER));
+    @PatchMapping("{bookingId}")
+    public ResponseEntity<BookingDtoResponse> approveBooking(@RequestHeader(USER_ID_HEADER) @Min(1) Long ownerId,
+                                                             @RequestParam String approved,
+                                                             @PathVariable @Min(1) Long bookingId) {
+        return ResponseEntity.status(HttpStatus.OK).body(bookingService.approveBooking(ownerId, bookingId, approved));
     }
 
-    @GetMapping("/{bookingId}")   // Получение данных о конкретном бронировании (включая его статус)
-    public ResponseEntity<BookingDto> getBookingById(@PathVariable long bookingId, @RequestHeader(USER_ID_HEADER) long userId) {
-        UriComponents uriComponents = UriComponentsBuilder.newInstance()
-                .scheme(PROTOCOL)
-                .host(HOST)
-                .port(PORT)
-                .path("/bookings/{bookingId}")
-                .build();
-        Logger.logRequest(HttpMethod.GET, uriComponents.toUriString(), "no body");
-        return ResponseEntity.ok().body(bookingService.getBooking(bookingId, userId, AccessLevel.OWNER_AND_BOOKER));
+    @GetMapping("{bookingId}")
+    public ResponseEntity<BookingDtoResponse> getBookingByIdForOwnerAndBooker(
+            @PathVariable @Min(1) Long bookingId,
+            @RequestHeader(USER_ID_HEADER) @Min(1) Long userId) {
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(bookingService.getBookingByIdForOwnerAndBooker(bookingId, userId));
     }
 
-    @GetMapping   // Получение списка всех бронирований текущего пользователя (можно делать выборку по статусу).
-    public ResponseEntity<List<BookingDto>> getBookingsOfCurrentUser(@RequestParam(defaultValue = "ALL") String state,
-                                              @RequestHeader(USER_ID_HEADER) long userId) {
-        UriComponents uriComponents = UriComponentsBuilder.newInstance()
-                .scheme(PROTOCOL)
-                .host(HOST)
-                .port(PORT)
-                .path("/bookings/")
-                .query("state={state}")
-                .build();
-        Logger.logRequest(HttpMethod.GET, uriComponents.toUriString(), "no body");
-        return ResponseEntity.ok().body(bookingService.getBookingsOfCurrentUser(State.convert(state), userId));
+    @GetMapping
+    public ResponseEntity<BookingListDto> getAllBookingsForUser(
+            @RequestHeader(USER_ID_HEADER) @Min(1) Long userId,
+            @RequestParam(defaultValue = "ALL") String state,
+            @RequestParam(value = "from", defaultValue = "0") @Min(0) Integer from,
+            @RequestParam(value = "size", defaultValue = "10") @Min(1) @Max(20) Integer size) {
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(bookingService.getAllBookingsForUser(PageRequest.of(from / size, size), userId, state));
     }
 
-    // Получение списка бронирований для всех вещей текущего пользователя-владельца (можно делать выборку по статусу)
-    @GetMapping("/owner")
-    public ResponseEntity<List<BookingDto>> getBookingsOfOwner(@RequestParam(defaultValue = "ALL") String state,
-                                        @RequestHeader(USER_ID_HEADER) long userId) {
-        UriComponents uriComponents = UriComponentsBuilder.newInstance()
-                .scheme(PROTOCOL)
-                .host(HOST)
-                .port(PORT)
-                .path("/bookings/owner")
-                .query("state={state}")
-                .build();
-        Logger.logRequest(HttpMethod.GET, uriComponents.toUriString(), "no body");
-        return ResponseEntity.ok().body(bookingService.getBookingsOfOwner(State.convert(state), userId));
+    @GetMapping("owner")
+    public ResponseEntity<BookingListDto> getAllBookingsForItemsUser(
+            @RequestHeader(USER_ID_HEADER) @Min(1) Long userId,
+            @RequestParam(defaultValue = "ALL") String state,
+            @RequestParam(value = "from", defaultValue = "0") @Min(0) Integer from,
+            @RequestParam(value = "size", defaultValue = "10") @Min(1) @Max(20) Integer size) {
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(bookingService.getAllBookingsForItemsUser(PageRequest.of(from / size, size), userId, state));
     }
 }
