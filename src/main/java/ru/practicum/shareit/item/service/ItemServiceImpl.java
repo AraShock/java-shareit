@@ -88,20 +88,26 @@ public class ItemServiceImpl implements ItemService {
     @Override
     @Transactional(readOnly = true)
     public ItemListDto getPersonalItems(Pageable pageable, Long userId) {
+
         if (!users.existsById(userId)) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, String.format("Пользователя с id=%s не существует", userId));
         }
+
         List<ItemDtoResponse> personalItems = items.findAllByOwnerId(pageable, userId).stream()
                 .map(mapper::mapToItemDtoResponse).collect(Collectors.toList());
+
         for (ItemDtoResponse item : personalItems) {
             item.setLastBooking(mapper.mapToBookingShortDto(bookings.findFirstByItemIdAndEndBeforeAndStatusOrderByEndDesc(
                     item.getId(), LocalDateTime.now(), Status.APPROVED).orElse(null)));
+
+
             item.setNextBooking(mapper.mapToBookingShortDto(bookings
                     .findFirstByItemIdAndStartAfterAndStatusOrderByStartAsc(
                             item.getId(), LocalDateTime.now(), Status.APPROVED).orElse(null)
             ));
         }
         return ItemListDto.builder().items(personalItems).build();
+        
     }
 
     @Override

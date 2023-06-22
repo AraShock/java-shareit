@@ -72,7 +72,7 @@ public class BookingServiceImpl implements BookingService {
     public BookingDtoResponse approveBooking(Long ownerId, Long bookingId, String approved) {
         String approve = approved.toLowerCase();
         if (!(approve.equals("true") || approve.equals("false"))) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Неккоректный параметр строки approved");
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Некорректный параметр строки approved");
         }
         Booking booking = bookings.findById(bookingId).orElseThrow(
                 () -> new ResponseStatusException(HttpStatus.NOT_FOUND,
@@ -125,14 +125,14 @@ public class BookingServiceImpl implements BookingService {
         }
         if (!items.existsItemByOwnerId(userId)) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND,
-                    String.format("У пользователя с id=%s нет зарегестрированых вещей", userId));
+                    String.format("У пользователя с id=%s нет зарегистрированных вещей", userId));
         } else {
             return getListBookings(pageable, state, userId, true);
         }
 
     }
 
-    private BookingListDto getListBookings(Pageable pageable, String state, Long userId, Boolean isOwner) {
+     BookingListDto getListBookings(Pageable pageable, String state, Long userId, Boolean isOwner) {
         List<Long> itemsId;
         switch (State.fromValue(state.toUpperCase())) {
             case ALL:
