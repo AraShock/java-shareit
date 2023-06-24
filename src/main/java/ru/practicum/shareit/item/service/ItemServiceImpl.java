@@ -122,8 +122,8 @@ public class ItemServiceImpl implements ItemService {
     @Override
     @Transactional
     public CommentDtoResponse addComment(Long itemId, Long userId, CommentDto commentDto) {
-        if (bookings.existsBookingByItemIdAndBookerIdAndStatusAndEndIsBefore(itemId, userId,
-                Status.APPROVED, LocalDateTime.now()) == null) {
+        if (!bookings.existsBookingByItemIdAndBookerIdAndStatusAndEndIsBefore(itemId, userId,
+                Status.APPROVED, LocalDateTime.now())) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
                     String.format("У пользователя с id=%s небыло ниодной брони на предмет с id=%s", userId, itemId));
         } else {
