@@ -39,7 +39,7 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
 
     Optional<Booking> findFirstByItemIdAndEndBeforeAndStatusOrderByEndDesc(Long itemId, LocalDateTime end, Status status); // постман требует от меня null
 
-    Optional<Booking> findFirstByItemIdAndStartAfterAndStatusOrderByStartAsc(Long itemId, LocalDateTime start, Status status);
+    Optional<Booking> findFirstByItemIdAndStartAfterAndStatusOrderByStartAsc(Long itemId, LocalDateTime end, Status status);
 
     Boolean existsBookingByItemIdAndBookerIdAndStatusAndEndIsBefore(
             Long itemId, Long bookerId, Status status, LocalDateTime end);
