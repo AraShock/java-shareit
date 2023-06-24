@@ -73,7 +73,7 @@ public class ItemServiceImpl implements ItemService {
         if (item.getOwner().getId().equals(userId)) {
             itemDtoResponse.setLastBooking(mapper
                     .mapToBookingShortDto(bookings
-                            .findFirstByItemIdAndEndBeforeAndStatusOrderByEndDesc(
+                            .findFirstByItemIdAndStartBeforeAndStatusOrderByStartDesc(
                                     itemId, LocalDateTime.now(), Status.APPROVED).orElse(null)
                     ));
             itemDtoResponse.setNextBooking(mapper.mapToBookingShortDto(bookings
@@ -96,7 +96,7 @@ public class ItemServiceImpl implements ItemService {
         List<ItemDtoResponse> personalItems = items.findAllByOwnerId(pageable, userId).stream()
                 .map(mapper::mapToItemDtoResponse).collect(Collectors.toList());
         for (ItemDtoResponse item : personalItems) {
-            item.setLastBooking(mapper.mapToBookingShortDto(bookings.findFirstByItemIdAndEndBeforeAndStatusOrderByEndDesc(
+            item.setLastBooking(mapper.mapToBookingShortDto(bookings.findFirstByItemIdAndStartBeforeAndStatusOrderByStartDesc(
                     item.getId(), LocalDateTime.now(), Status.APPROVED).orElse(null)));
 
 
