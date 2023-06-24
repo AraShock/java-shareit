@@ -70,7 +70,7 @@ public class ItemServiceImpl implements ItemService {
         Item item = items.findById(itemId).orElseThrow(
                 () -> new ResponseStatusException(HttpStatus.NOT_FOUND, String.format("Предмета с id=%s нет", itemId)));
         ItemDtoResponse itemDtoResponse = mapper.mapToItemDtoResponse(item);
-        if (item.getOwner().getId().equals(userId) || equals(Status.APPROVED)) {
+        if (item.getOwner().getId().equals(userId)) {
             itemDtoResponse.setLastBooking(mapper
                     .mapToBookingShortDto(bookings
                             .findFirstByItemIdAndEndBeforeAndStatusOrderByEndDesc(
@@ -95,7 +95,6 @@ public class ItemServiceImpl implements ItemService {
 
         List<ItemDtoResponse> personalItems = items.findAllByOwnerId(pageable, userId).stream()
                 .map(mapper::mapToItemDtoResponse).collect(Collectors.toList());
-
         for (ItemDtoResponse item : personalItems) {
             item.setLastBooking(mapper.mapToBookingShortDto(bookings.findFirstByItemIdAndEndBeforeAndStatusOrderByEndDesc(
                     item.getId(), LocalDateTime.now(), Status.APPROVED).orElse(null)));
@@ -107,7 +106,6 @@ public class ItemServiceImpl implements ItemService {
             ));
         }
         return ItemListDto.builder().items(personalItems).build();
-        
     }
 
     @Override
@@ -124,8 +122,8 @@ public class ItemServiceImpl implements ItemService {
     @Override
     @Transactional
     public CommentDtoResponse addComment(Long itemId, Long userId, CommentDto commentDto) {
-        if (!bookings.existsBookingByItemIdAndBookerIdAndStatusAndEndIsBefore(itemId, userId,
-                Status.APPROVED, LocalDateTime.now())) {
+        if (bookings.existsBookingByItemIdAndBookerIdAndStatusAndEndIsBefore(itemId, userId,
+                Status.APPROVED, LocalDateTime.now()) == null) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
                     String.format("У пользователя с id=%s небыло ниодной брони на предмет с id=%s", userId, itemId));
         } else {
