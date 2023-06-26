@@ -17,10 +17,7 @@ import javax.persistence.Table;
 import java.util.Objects;
 import java.util.Set;
 
-@Getter
-@Setter
-@EqualsAndHashCode
-@RequiredArgsConstructor
+@Data
 @Entity
 @Table(name = "items")
 public class Item {
@@ -43,7 +40,6 @@ public class Item {
     @OneToMany(mappedBy = "item")
     private Set<Comment> comments;
 
-    @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || Hibernate.getClass(this) != Hibernate.getClass(o)) return false;
@@ -51,7 +47,6 @@ public class Item {
         return id != null && Objects.equals(id, item.id);
     }
 
-    @Override
     public int hashCode() {
         return getClass().hashCode();
     }
