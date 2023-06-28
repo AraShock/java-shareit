@@ -29,7 +29,7 @@ public class Comment {
     @Column
     private LocalDateTime created;
 
-    @Override
+
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || Hibernate.getClass(this) != Hibernate.getClass(o)) return false;
@@ -37,7 +37,7 @@ public class Comment {
         return id != null && Objects.equals(id, comment.id);
     }
 
-    @Override
+
     public int hashCode() {
         return getClass().hashCode();
     }

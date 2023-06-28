@@ -4,7 +4,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.repository.PagingAndSortingRepository;
 import ru.practicum.shareit.booking.enums.Status;
 import ru.practicum.shareit.booking.model.Booking;
-import ru.practicum.shareit.item.model.Item;
 
 import java.time.LocalDateTime;
 import java.util.Collection;
@@ -38,9 +37,9 @@ public interface BookingRepository extends PagingAndSortingRepository<Booking, L
     List<Booking> findAllByItemIdInAndStatusIsOrderByStartDesc(
             Pageable pageable, Collection<Long> itemId, Status status);
 
-    Optional<Booking> findFirstByItemAndStatusIsOrderByStartAsc(Item item, Status status);
+    Optional<Booking> findFirstByItemIdAndStartAfterAndStatusOrderByStartAsc(Long itemId, LocalDateTime end, Status status);
 
-    Optional<Booking> findFirstByItemAndStatusIsOrderByEndDesc(Item item, Status status);
+    Optional<Booking> findFirstByItemIdAndStartBeforeAndStatusOrderByStartDesc(Long itemId, LocalDateTime end, Status status);
 
     Boolean existsBookingByItemIdAndBookerIdAndStatusAndEndIsBefore(
             Long itemId, Long bookerId, Status status, LocalDateTime end);
