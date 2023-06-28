@@ -5,22 +5,21 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
+import ru.practicum.shareit.booking.enums.State;
+import ru.practicum.shareit.booking.enums.Status;
 import ru.practicum.shareit.booking.dto.BookingDto;
 import ru.practicum.shareit.booking.dto.BookingDtoResponse;
 import ru.practicum.shareit.booking.dto.BookingListDto;
-import ru.practicum.shareit.booking.enums.State;
-import ru.practicum.shareit.booking.enums.Status;
 import ru.practicum.shareit.booking.mapper.BookingMapper;
 import ru.practicum.shareit.booking.model.Booking;
 import ru.practicum.shareit.booking.repository.BookingRepository;
 import ru.practicum.shareit.handler.exception.StateException;
-
 import ru.practicum.shareit.item.repository.ItemRepository;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.user.repository.UserRepository;
 import ru.practicum.shareit.user.model.User;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -46,6 +45,7 @@ public class BookingServiceImpl implements BookingService {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
                     "Booking datetime data incorrect");
         }
+
         Item item = items.findById(bookingDto.getItemId()).orElseThrow(
                 () -> new ResponseStatusException(HttpStatus.NOT_FOUND,
                         String.format("Предмета с id=%s нет", bookingDto.getItemId())));
@@ -72,7 +72,7 @@ public class BookingServiceImpl implements BookingService {
     public BookingDtoResponse approveBooking(Long ownerId, Long bookingId, String approved) {
         String approve = approved.toLowerCase();
         if (!(approve.equals("true") || approve.equals("false"))) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Неккоректный параметр строки approved");
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Некорректный параметр строки approved");
         }
         Booking booking = bookings.findById(bookingId).orElseThrow(
                 () -> new ResponseStatusException(HttpStatus.NOT_FOUND,
@@ -98,8 +98,7 @@ public class BookingServiceImpl implements BookingService {
     @Transactional(readOnly = true)
     public BookingDtoResponse getBookingByIdForOwnerAndBooker(Long bookingId, Long userId) {
         Booking booking = bookings.findById(bookingId).orElseThrow(
-                () -> new ResponseStatusException(HttpStatus.NOT_FOUND,
-                        String.format("Бронирования с id=%s нет", bookingId)));
+                () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Бронирования с id=" + bookingId + " нет"));
         if (!(booking.getBooker().getId().equals(userId) || booking.getItem().getOwner().getId().equals(userId))) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND,
                     String.format("Пользователь с id=%s не является автором бронирования или владельцем вещи, к которой относится бронирование", userId));
@@ -126,14 +125,14 @@ public class BookingServiceImpl implements BookingService {
         }
         if (!items.existsItemByOwnerId(userId)) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND,
-                    String.format("У пользователя с id=%s нет зарегестрированых вещей", userId));
+                    String.format("У пользователя с id=%s нет зарегистрированных вещей", userId));
         } else {
             return getListBookings(pageable, state, userId, true);
         }
 
     }
 
-    private BookingListDto getListBookings(Pageable pageable, String state, Long userId, Boolean isOwner) {
+    BookingListDto getListBookings(Pageable pageable, String state, Long userId, Boolean isOwner) {
         List<Long> itemsId;
         switch (State.fromValue(state.toUpperCase())) {
             case ALL:
