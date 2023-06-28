@@ -72,10 +72,10 @@ public class ItemServiceImpl implements ItemService {
         if (item.getOwner().getId().equals(userId)) {
             itemDtoResponse.setLastBooking(mapper
                     .mapToBookingShortDto(bookings
-                            .findFirstByItemIdAndStartAfterAndStatusOrderByStartAsc(item, Status.APPROVED).orElse(null)
+                            .findFirstByItemAndStatusIsOrderByStartAsc(item, Status.APPROVED).orElse(null)
                     ));
             itemDtoResponse.setNextBooking(mapper.mapToBookingShortDto(bookings
-                    .findFirstByItemIdAndStartBeforeAndStatusOrderByStartDesc(item, Status.APPROVED).orElse(null)));
+                    .findFirstByItemAndStatusIsOrderByEndDesc(item, Status.APPROVED).orElse(null)));
             return itemDtoResponse;
         }
         return itemDtoResponse;
@@ -92,9 +92,9 @@ public class ItemServiceImpl implements ItemService {
         for (Item item : findItems) {
             ItemDtoResponse itemDtoResponse = mapper.mapToItemDtoResponse(item);
             itemDtoResponse.setLastBooking(mapper.mapToBookingShortDto(
-                    bookings.findFirstByItemIdAndStartAfterAndStatusOrderByStartAsc(item, Status.APPROVED).orElse(null)));
+                    bookings.findFirstByItemAndStatusIsOrderByStartAsc(item, Status.APPROVED).orElse(null)));
             itemDtoResponse.setNextBooking(mapper.mapToBookingShortDto(
-                    bookings.findFirstByItemIdAndStartBeforeAndStatusOrderByStartDesc(item, Status.APPROVED).orElse(null)));
+                    bookings.findFirstByItemAndStatusIsOrderByEndDesc(item, Status.APPROVED).orElse(null)));
             personalItems.add(itemDtoResponse);
 
         }
