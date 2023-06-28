@@ -37,15 +37,9 @@ public class BookingServiceImpl implements BookingService {
     @Override
     @Transactional
     public BookingDtoResponse createBooking(Long bookerId, BookingDto bookingDto) {
-
         if (bookingDto.getEnd().isBefore(bookingDto.getStart())) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
                     "Дата окончания бронирования не может быть раньше даты начала");
-        }
-        if (bookingDto.getStart().equals(bookingDto.getEnd()) ||
-                bookingDto.getStart().isAfter(bookingDto.getEnd())) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-                    "Booking datetime data incorrect");
         }
 
         Item item = items.findById(bookingDto.getItemId()).orElseThrow(
