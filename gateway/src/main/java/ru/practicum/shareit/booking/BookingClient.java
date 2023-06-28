@@ -66,15 +66,4 @@ public class BookingClient extends BaseWebClient {
             throw new StateException("Unknown state: " + state);
         }
     }
-
-    public Mono<ResponseEntity<Object>> getBooking(Long userId, Long bookingId) {
-        return get("/" + bookingId, userId);
-    }
-
-    public ResponseEntity<Object> setApprove(long ownerId, Boolean approve, long bookingId) {
-        return patch("/" + bookingId + "?approved=" + approve, ownerId);
-
-
-    }
-
 }
