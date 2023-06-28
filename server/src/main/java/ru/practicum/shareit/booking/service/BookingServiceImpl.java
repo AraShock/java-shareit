@@ -41,6 +41,11 @@ public class BookingServiceImpl implements BookingService {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
                     "Дата окончания бронирования не может быть раньше даты начала");
         }
+        if (bookingDto.getStart().equals(bookingDto.getEnd()) ||
+                bookingDto.getStart().isAfter(bookingDto.getEnd())) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                    "Booking datetime data incorrect");
+        }
         Item item = items.findById(bookingDto.getItemId()).orElseThrow(
                 () -> new ResponseStatusException(HttpStatus.NOT_FOUND,
                         String.format("Предмета с id=%s нет", bookingDto.getItemId())));
