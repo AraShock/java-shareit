@@ -18,7 +18,7 @@ public class BookingDto {
     @Future(message = "Конец бронирования не может быть в прошлом")
     @NotNull(message = "Поле end обязательно")
     private LocalDateTime end;
-    @NotNull(message = "Поле itemId обязательо")
+    @NotNull(message = "Поле itemId обязательно")
     @Min(value = 1, message = "Некорректный itemId")
     private Long itemId;
     private final Status status = Status.WAITING;
