@@ -46,7 +46,7 @@ public class BookingClient extends BaseWebClient {
                 "from", from,
                 "size", size
         );
-        return get("?state={state}&&from={from}&&size={size}", userId, parameters);
+        return get("?state={state}&from={from}&size={size}", userId, parameters);
     }
 
     public Mono<ResponseEntity<Object>> getAllBookingsForItemsUser(Long userId, String state, Integer from,
@@ -56,8 +56,9 @@ public class BookingClient extends BaseWebClient {
                 "state", state,
                 "from", from,
                 "size", size
+
         );
-        return get("/owner?state={state}&&from={from}&&size={size}", userId, parameters);
+        return get("/owner?state={state}&from={from}&size={size}", userId, parameters);
     }
 
     private void validateState(String state) {
@@ -65,4 +66,15 @@ public class BookingClient extends BaseWebClient {
             throw new StateException("Unknown state: " + state);
         }
     }
+
+    public Mono<ResponseEntity<Object>> getBooking(Long userId, Long bookingId) {
+        return get("/" + bookingId, userId);
+    }
+
+    public ResponseEntity<Object> setApprove(long ownerId, Boolean approve, long bookingId) {
+        return patch("/" + bookingId + "?approved=" + approve, ownerId);
+
+
+    }
+
 }
