@@ -59,4 +59,6 @@ public class BookingController {
         return ResponseEntity.status(HttpStatus.OK)
                 .body(bookingService.getAllBookingsForItemsUser(PageRequest.of(from / size, size), userId, state));
     }
+
+
 }

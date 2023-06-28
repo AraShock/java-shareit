@@ -2,11 +2,9 @@ package ru.practicum.shareit.booking;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.server.ResponseStatusException;
 import reactor.core.publisher.Mono;
 import ru.practicum.shareit.booking.dto.BookingDto;
 import ru.practicum.shareit.common.Header;
@@ -26,18 +24,17 @@ public class BookingController {
     @PostMapping
     public Mono<ResponseEntity<Object>> createBooking(@RequestHeader(Header.userIdHeader) @Min(1) Long bookerId,
                                                       @Valid @RequestBody BookingDto bookingDto) {
-        if (bookingDto.getStart().isEqual(bookingDto.getEnd())) throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "error");
         return bookingClient.createBooking(bookerId, bookingDto);
     }
 
-    @PatchMapping("/{bookingId}")
+    @PatchMapping("{bookingId}")
     public Mono<ResponseEntity<Object>> approveBooking(@RequestHeader(Header.userIdHeader) @Min(1) Long ownerId,
                                                        @RequestParam String approved,
                                                        @PathVariable @Min(1) Long bookingId) {
         return bookingClient.approveBooking(ownerId, approved, bookingId);
     }
 
-    @GetMapping("/{bookingId}")
+    @GetMapping("{bookingId}")
     public Mono<ResponseEntity<Object>> getBookingByIdForOwnerAndBooker(
             @PathVariable @Min(1) Long bookingId,
             @RequestHeader(Header.userIdHeader) @Min(1) Long userId) {
@@ -53,7 +50,7 @@ public class BookingController {
         return bookingClient.getAllBookingsForUser(userId, state, from, size);
     }
 
-    @GetMapping("/owner")
+    @GetMapping("owner")
     public Mono<ResponseEntity<Object>> getAllBookingsForItemsUser(
             @RequestHeader(Header.userIdHeader) @Min(1) Long userId,
             @RequestParam(defaultValue = "ALL") String state,
@@ -62,3 +59,4 @@ public class BookingController {
         return bookingClient.getAllBookingsForItemsUser(userId, state, from, size);
     }
 }
+

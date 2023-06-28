@@ -28,7 +28,10 @@ public class BookingClient extends BaseWebClient {
     }
 
     public Mono<ResponseEntity<Object>> approveBooking(Long ownerId, String approved, Long bookingId) {
-        return patch("/" + bookingId + "?approved=" + approved, ownerId, null);
+        Map<String, Object> parameters = Map.of(
+                "approved", approved
+        );
+        return patch("/" + bookingId + "?approved={approved}", ownerId, parameters, null);
     }
 
     public Mono<ResponseEntity<Object>> getBookingByIdForOwnerAndBooker(Long bookingId, Long userId) {
@@ -53,6 +56,7 @@ public class BookingClient extends BaseWebClient {
                 "state", state,
                 "from", from,
                 "size", size
+
         );
         return get("/owner?state={state}&from={from}&size={size}", userId, parameters);
     }
