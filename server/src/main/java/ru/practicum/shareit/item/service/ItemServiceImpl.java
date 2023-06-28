@@ -72,12 +72,10 @@ public class ItemServiceImpl implements ItemService {
         if (item.getOwner().getId().equals(userId)) {
             itemDtoResponse.setLastBooking(mapper
                     .mapToBookingShortDto(bookings
-                            .findFirstByItemIdAndStartAfterAndStatusOrderByStartAsc(
-                                    itemId, LocalDateTime.now(), Status.APPROVED).orElse(null)
+                            .findFirstByItemAndStatusIsOrderByStartAsc(item, Status.APPROVED).orElse(null)
                     ));
             itemDtoResponse.setNextBooking(mapper.mapToBookingShortDto(bookings
-                    .findFirstByItemIdAndStartBeforeAndStatusOrderByStartDesc(
-                            itemId, LocalDateTime.now(), Status.APPROVED).orElse(null)));
+                    .findFirstByItemIdAndStartBeforeAndStatusOrderByStartDesc(item, Status.APPROVED).orElse(null)));
             return itemDtoResponse;
         }
         return itemDtoResponse;
@@ -86,26 +84,22 @@ public class ItemServiceImpl implements ItemService {
     @Override
     @Transactional(readOnly = true)
     public ItemListDto getPersonalItems(Pageable pageable, Long userId) {
-
         if (!users.existsById(userId)) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, String.format("Пользователя с id=%s не существует", userId));
         }
+        List<Item> findItems = items.findAllByOwnerId(pageable, userId);
+        List<ItemDtoResponse> personalItems = new ArrayList<>();
+        for (Item item : findItems) {
+            ItemDtoResponse itemDtoResponse = mapper.mapToItemDtoResponse(item);
+            itemDtoResponse.setLastBooking(mapper.mapToBookingShortDto(
+                    bookings.findFirstByItemAndStatusIsOrderByStartAsc(item, Status.APPROVED).orElse(null)));
+            itemDtoResponse.setNextBooking(mapper.mapToBookingShortDto(
+                    bookings.findFirstByItemIdAndStartBeforeAndStatusOrderByStartDesc(item, Status.APPROVED).orElse(null)));
+            personalItems.add(itemDtoResponse);
 
-        List<ItemDtoResponse> personalItems = items.findAllByOwnerId(pageable, userId).stream()
-                .map(mapper::mapToItemDtoResponse).collect(Collectors.toList());
-        for (ItemDtoResponse item : personalItems) {
-            item.setLastBooking(mapper.mapToBookingShortDto(bookings.findFirstByItemIdAndStartBeforeAndStatusOrderByStartDesc(
-                    item.getId(), LocalDateTime.now(), Status.APPROVED).orElse(null)));
-
-
-            item.setNextBooking(mapper.mapToBookingShortDto(bookings
-                    .findFirstByItemIdAndStartAfterAndStatusOrderByStartAsc(
-                            item.getId(), LocalDateTime.now(), Status.APPROVED).orElse(null)
-            ));
         }
         return ItemListDto.builder().items(personalItems).build();
     }
-
 
     @Override
     @Transactional(readOnly = true)
