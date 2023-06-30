@@ -33,7 +33,7 @@ public interface BookingRepository extends PagingAndSortingRepository<Booking, L
             Pageable pageable, Collection<Long> itemId, LocalDateTime end);
 
     List<Booking> findAllByItemIdInAndStartIsAfterOrderByStartDesc(
-            Pageable pageable, Collection<Long> itemId, LocalDateTime start);
+            Pageable pageable, Collection<Long> itemId, LocalDateTime end);
 
     List<Booking> findAllByItemIdInAndStatusIsOrderByStartDesc(
             Pageable pageable, Collection<Long> itemId, Status status);
