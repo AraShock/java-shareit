@@ -56,9 +56,8 @@ public class BookingClient extends BaseWebClient {
                 "state", state,
                 "from", from,
                 "size", size
-
         );
-        return get("/owner?state={state}&from={from}&size={size}", userId, parameters);
+        return get("/owner?state={state}&&from={from}&&size={size}", userId, parameters);
     }
 
     private void validateState(String state) {

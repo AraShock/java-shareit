@@ -59,4 +59,3 @@ public class BookingController {
         return bookingClient.getAllBookingsForItemsUser(userId, state, from, size);
     }
 }
-
