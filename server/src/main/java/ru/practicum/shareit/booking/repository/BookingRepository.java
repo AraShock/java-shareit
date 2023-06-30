@@ -20,7 +20,7 @@ public interface BookingRepository extends PagingAndSortingRepository<Booking, L
     List<Booking> findAllByBookerIdAndEndIsBeforeOrderByStartDesc(Pageable pageable, Long bookerId, LocalDateTime end);
 
     List<Booking> findAllByBookerIdAndStartIsAfterOrderByStartDesc(
-            Pageable pageable, Long bookerId, LocalDateTime start);
+            Pageable pageable, Long bookerId, LocalDateTime end);
 
     List<Booking> findAllByBookerIdAndStatusIsOrderByStartDesc(Pageable pageable, Long bookerId, Status status);
 
