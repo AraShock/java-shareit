@@ -38,5 +38,3 @@
 
 2. Для запуска проекта необходимы docker и docker-compose.
 3. Команда "docker-compose up" запускает оба сервиса с бд
-4. Для проверки функциональности и работоспособности приложения предусмотрены postman тесты:
-   [shareit-tests](https://github.com/AraShok/java-shareit/blob/main/postman/ShareIt-test.json)  
