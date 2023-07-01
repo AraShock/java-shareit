@@ -38,9 +38,9 @@ public interface BookingRepository extends PagingAndSortingRepository<Booking, L
     List<Booking> findAllByItemIdInAndStatusIsOrderByStartDesc(
             Pageable pageable, Collection<Long> itemId, Status status);
 
-    Optional<Booking> findFirstByItemAndStatusIsOrderByStartAsc(Item item,LocalDateTime end,Status status);
+    Optional<Booking> findFirstByItemAndStatusIsOrderByStartAsc(Item item, Status status);
 
-    Optional<Booking> findFirstByItemAndStatusIsOrderByEndDesc(Item item,LocalDateTime end,Status status);
+    Optional<Booking> findFirstByItemAndStatusIsOrderByEndDesc(Item item, Status status);
 
     Boolean existsBookingByItemIdAndBookerIdAndStatusAndEndIsBefore(
             Long itemId, Long bookerId, Status status, LocalDateTime end);
