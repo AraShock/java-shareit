@@ -5,7 +5,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 import ru.practicum.shareit.booking.repository.BookingRepository;
 import ru.practicum.shareit.booking.enums.Status;
@@ -15,11 +14,12 @@ import ru.practicum.shareit.item.model.Comment;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.item.repository.CommentRepository;
 import ru.practicum.shareit.item.repository.ItemRepository;
-import ru.practicum.shareit.request.repository.ItemRequestRepository;
 import ru.practicum.shareit.request.model.ItemRequest;
-
-import ru.practicum.shareit.user.model.User;
+import ru.practicum.shareit.request.repository.ItemRequestRepository;
 import ru.practicum.shareit.user.repository.UserRepository;
+import ru.practicum.shareit.user.model.User;
+
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -44,6 +44,7 @@ public class ItemServiceImpl implements ItemService {
             ItemRequest itemRequest = itemRequests.findById(item.getRequestId())
                     .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
                             String.format("Запроса с id=%s нет", item.getRequestId())));
+
             newItem.setRequest(itemRequest);
         }
         newItem.setOwner(users.findById(userId).orElseThrow(
@@ -72,10 +73,13 @@ public class ItemServiceImpl implements ItemService {
         if (item.getOwner().getId().equals(userId)) {
             itemDtoResponse.setLastBooking(mapper
                     .mapToBookingShortDto(bookings
-                            .findFirstByItemAndStatusIsOrderByStartAsc(item,Status.APPROVED).orElse(null)
+                            .findFirstByItemIdAndStartBeforeAndStatusOrderByStartDesc(
+                                    itemId, LocalDateTime.now(), Status.APPROVED).orElse(null)
                     ));
             itemDtoResponse.setNextBooking(mapper.mapToBookingShortDto(bookings
-                    .findFirstByItemAndStatusIsOrderByEndDesc(item, Status.APPROVED).orElse(null)));
+                    .findFirstByItemIdAndStartAfterAndStatusOrderByStartAsc(
+                            itemId, LocalDateTime.now(), Status.APPROVED).orElse(null)
+            ));
             return itemDtoResponse;
         }
         return itemDtoResponse;
@@ -84,19 +88,22 @@ public class ItemServiceImpl implements ItemService {
     @Override
     @Transactional(readOnly = true)
     public ItemListDto getPersonalItems(Pageable pageable, Long userId) {
+
         if (!users.existsById(userId)) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, String.format("Пользователя с id=%s не существует", userId));
         }
-        List<Item> findItems = items.findAllByOwnerId(pageable, userId);
-        List<ItemDtoResponse> personalItems = new ArrayList<>();
-        for (Item item : findItems) {
-            ItemDtoResponse itemDtoResponse = mapper.mapToItemDtoResponse(item);
-            itemDtoResponse.setLastBooking(mapper.mapToBookingShortDto(
-                    bookings.findFirstByItemAndStatusIsOrderByStartAsc(item, Status.APPROVED).orElse(null)));
-            itemDtoResponse.setNextBooking(mapper.mapToBookingShortDto(
-                    bookings.findFirstByItemAndStatusIsOrderByEndDesc(item, Status.APPROVED).orElse(null)));
-            personalItems.add(itemDtoResponse);
 
+        List<ItemDtoResponse> personalItems = items.findAllByOwnerId(pageable, userId).stream()
+                .map(mapper::mapToItemDtoResponse).collect(Collectors.toList());
+        for (ItemDtoResponse item : personalItems) {
+            item.setLastBooking(mapper.mapToBookingShortDto(bookings.findFirstByItemIdAndStartBeforeAndStatusOrderByStartDesc(
+                    item.getId(), LocalDateTime.now(), Status.APPROVED).orElse(null)));
+
+
+            item.setNextBooking(mapper.mapToBookingShortDto(bookings
+                    .findFirstByItemIdAndStartAfterAndStatusOrderByStartAsc(
+                            item.getId(), LocalDateTime.now(), Status.APPROVED).orElse(null)
+            ));
         }
         return ItemListDto.builder().items(personalItems).build();
     }

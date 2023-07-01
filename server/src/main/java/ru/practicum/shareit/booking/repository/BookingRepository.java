@@ -1,17 +1,16 @@
 package ru.practicum.shareit.booking.repository;
 
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.repository.PagingAndSortingRepository;
+import org.springframework.data.jpa.repository.JpaRepository;
 import ru.practicum.shareit.booking.enums.Status;
 import ru.practicum.shareit.booking.model.Booking;
-import ru.practicum.shareit.item.model.Item;
 
 import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 
-public interface BookingRepository extends PagingAndSortingRepository<Booking, Long> {
+public interface BookingRepository extends JpaRepository<Booking, Long> {
     List<Booking> findAllByBookerIdOrderByStartDesc(Pageable pageable, Long bookerId);
 
     List<Booking> findAllByBookerIdAndStartIsBeforeAndEndIsAfterOrderByStartDesc(
@@ -20,7 +19,7 @@ public interface BookingRepository extends PagingAndSortingRepository<Booking, L
     List<Booking> findAllByBookerIdAndEndIsBeforeOrderByStartDesc(Pageable pageable, Long bookerId, LocalDateTime end);
 
     List<Booking> findAllByBookerIdAndStartIsAfterOrderByStartDesc(
-            Pageable pageable, Long bookerId, LocalDateTime end);
+            Pageable pageable, Long bookerId, LocalDateTime start);
 
     List<Booking> findAllByBookerIdAndStatusIsOrderByStartDesc(Pageable pageable, Long bookerId, Status status);
 
@@ -33,14 +32,14 @@ public interface BookingRepository extends PagingAndSortingRepository<Booking, L
             Pageable pageable, Collection<Long> itemId, LocalDateTime end);
 
     List<Booking> findAllByItemIdInAndStartIsAfterOrderByStartDesc(
-            Pageable pageable, Collection<Long> itemId, LocalDateTime end);
+            Pageable pageable, Collection<Long> itemId, LocalDateTime start);
 
     List<Booking> findAllByItemIdInAndStatusIsOrderByStartDesc(
             Pageable pageable, Collection<Long> itemId, Status status);
 
-    Optional<Booking> findFirstByItemAndStatusIsOrderByStartAsc(Item item, Status status);
+    Optional<Booking> findFirstByItemIdAndStartBeforeAndStatusOrderByStartDesc(Long itemId, LocalDateTime end, Status status); // постман требует от меня null
 
-    Optional<Booking> findFirstByItemAndStatusIsOrderByEndDesc(Item item, Status status);
+    Optional<Booking> findFirstByItemIdAndStartAfterAndStatusOrderByStartAsc(Long itemId, LocalDateTime end, Status status);
 
     Boolean existsBookingByItemIdAndBookerIdAndStatusAndEndIsBefore(
             Long itemId, Long bookerId, Status status, LocalDateTime end);
